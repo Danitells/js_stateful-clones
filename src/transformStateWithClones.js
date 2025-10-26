@@ -24,33 +24,40 @@ const result = transformStateWithClones(state1, [
 /**
  * @param {Object} state
  * @param {Object[]} actions
- *
  * @return {Object[]}
  */
 function transformStateWithClones(state, actions) {
-  const baseState = {...state}
-  let resultArr = []
-for (const action of actions) {
-  if(action.type ==='addProperties')
-  {
-    let currentState = {...baseState, ...action.extraData };
-    resultArr.push(currentState);
-  }
-  if (action.type ==='removeProperties')
-  {
-    for (const key of action.keysToRemove) {
-      delete baseState[key];
-      resultArr.push(baseState);
-    }
-   
-  }
-  if (action.type ==='clear')
-    {
-    baseState = {}
-    resultArr.push(baseState)
-    }
-}
-}
+  let currentState = { ...state };
+  const resultArr = [];
 
+  for (const action of actions) {
+    switch (action.type) {
+      case 'addProperties':
+        currentState = { ...currentState, ...action.extraData };
+        break;
+
+      case 'removeProperties':
+        currentState = Object.fromEntries(
+          Object.entries(currentState).filter(
+            ([key]) => !action.keysToRemove.includes(key)
+          )
+        );
+        break;
+
+      case 'clear':
+        currentState = {};
+        break;
+
+      default:
+
+        continue;
+    }
+
+  
+    resultArr.push({ ...currentState });
+  }
+
+  return resultArr;
+}
 console.log(result)
 module.exports = transformStateWithClones;
